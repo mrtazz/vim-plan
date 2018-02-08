@@ -8,7 +8,7 @@ if !exists("g:PlanPath")
 endif
 
 if !exists("g:PlanTemplatePath")
-  let g:PlanTemplatePath = "~/.vim/templates/plan/"
+  let g:PlanTemplatePath = "~/.plan/templates/"
 endif
 
 function! plan#replaceTemplateVariables()
@@ -40,21 +40,22 @@ endfunction
 
 function! plan#GetCurrentPlanByYear()
   let planYear = strftime('%Y')
-  let planFile = g:PlanPath . planYear . "/index.md"
+  let planFile = g:PlanPath . planYear . "/year.md"
   return planFile
 endfunction
 
 function! plan#GetCurrentPlanByMonth()
   let planMonth = strftime('%B')
+  let planMonthNumber = strftime('%m')
   let planYear = strftime('%Y')
-  let planFile = g:PlanPath . planYear . "/" . planMonth . ".md"
+  let planFile = g:PlanPath . planYear . "/" . planMonthNumber . '-' .planMonth . ".md"
   return planFile
 endfunction
 
 function! plan#GetCurrentPlanByWeek()
   let planWeek = strftime('%V')
   let planYear = strftime('%Y')
-  let planFile = g:PlanPath . planYear . "/week" . planWeek . ".md"
+  let planFile = g:PlanPath . planYear . "/weeks/" . planWeek . ".md"
   return planFile
 endfunction
 
@@ -62,9 +63,12 @@ function! plan#OpenCurrentPlanByWeek()
   let plan = plan#GetCurrentPlanByWeek()
   execute 'edit' plan
   if !filereadable(plan)
-    "read in the template
-    execute 'read ' . g:PlanTemplatePath . "weekly.md"
-    call plan#replaceTemplateVariables()
+    "read in the template file if available
+    let tmplPath = g:PlanTemplatePath . "week"
+    if filereadable(tmplPath)
+      execute 'read ' . tmplPath
+      call plan#replaceTemplateVariables()
+    endif
   endif
 endfunction
 
@@ -72,8 +76,12 @@ function! plan#OpenCurrentPlanByMonth()
   let plan = plan#GetCurrentPlanByMonth()
   execute 'edit' plan
   if !filereadable(plan)
-    "read in the template
-    execute 'read ' . g:PlanTemplatePath . "monthly.md"
+    "read in the template file if available
+    let tmplPath = g:PlanTemplatePath . "month"
+    if filereadable(tmplPath)
+      execute 'read ' . tmplPath
+      call plan#replaceTemplateVariables()
+    endif
     call plan#replaceTemplateVariables()
   endif
 endfunction
@@ -82,8 +90,16 @@ function! plan#OpenCurrentPlanByYear()
   let plan = plan#GetCurrentPlanByYear()
   execute 'edit' plan
   if !filereadable(plan)
-    "read in the template
-    execute 'read ' . g:PlanTemplatePath . "yearly.md"
-    call plan#replaceTemplateVariables()
+    " read in the template file if available
+    let tmplPath = g:PlanTemplatePath . "year"
+    if filereadable(tmplPath)
+      execute 'read ' . tmplPath
+      call plan#replaceTemplateVariables()
+    endif
   endif
+endfunction
+
+function! plan Today()
+  let today = strftime("%A %m\/%d\/%Y")
+  exe "normal a". today
 endfunction
