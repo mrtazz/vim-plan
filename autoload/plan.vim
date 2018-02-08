@@ -7,19 +7,83 @@ if !exists("g:PlanPath")
   let g:PlanPath = "~/.plan/"
 endif
 
-function! GetCurrentPlanByMonth()
+if !exists("g:PlanTemplatePath")
+  let g:PlanTemplatePath = "~/.vim/templates/plan/"
+endif
+
+function! plan#replaceTemplateVariables()
+  " replace occurrences of DATE with the actual date
+  let thedate = strftime("%m\\/%d\\/%Y")
+  silent exe "1,$g/%%DATE%%/s/%%DATE%%/" . thedate
+
+  " replace occurrences of WEEKDAY with the current weekday
+  let weekday = strftime("%A")
+  silent exe "1,$g/%%WEEKDAY%%/s/%%WEEKDAY%%/" . weekday
+
+  " replace occurrences of MONTH with the current month
+  let month = strftime("%B")
+  silent exe "1,$g/%%MONTH%%/s/%%MONTH%%/" . month
+
+  " replace occurrences of YEAR with the current year
+  let year = strftime("%Y")
+  silent exe "1,$g/%%YEAR%%/s/%%YEAR%%/" . year
+
+  " replace occurrences of WEEKNUMBER with the current weeknumber
+  let weeknumber = strftime("%V")
+  silent exe "1,$g/%%WEEKNUMBER%%/s/%%WEEKNUMBER%%/" . weeknumber
+
+  "if the cursor was previously on a blank line, delete it
+  if getline(line(".")-1) =~ '^\s*$'
+      exec line(".")-1 . 'd'
+  endif
+endfunction
+
+function! plan#GetCurrentPlanByYear()
+  let planYear = strftime('%Y')
+  let planFile = g:PlanPath . planYear . "/index.md"
+  return planFile
+endfunction
+
+function! plan#GetCurrentPlanByMonth()
   let planMonth = strftime('%B')
   let planYear = strftime('%Y')
   let planFile = g:PlanPath . planYear . "/" . planMonth . ".md"
-  execute 'edit' planFile
+  return planFile
 endfunction
 
-function! GetCurrentPlanByWeek()
+function! plan#GetCurrentPlanByWeek()
   let planWeek = strftime('%V')
   let planYear = strftime('%Y')
   let planFile = g:PlanPath . planYear . "/week" . planWeek . ".md"
-  execute 'edit' planFile
+  return planFile
 endfunction
 
-command! OpenWeekPlan :call GetCurrentPlanByWeek()
-command! OpenMonthPlan :call GetCurrentPlanByMonth()
+function! plan#OpenCurrentPlanByWeek()
+  let plan = plan#GetCurrentPlanByWeek()
+  execute 'edit' plan
+  if !filereadable(plan)
+    "read in the template
+    execute 'read ' . g:PlanTemplatePath . "weekly.md"
+    call plan#replaceTemplateVariables()
+  endif
+endfunction
+
+function! plan#OpenCurrentPlanByMonth()
+  let plan = plan#GetCurrentPlanByMonth()
+  execute 'edit' plan
+  if !filereadable(plan)
+    "read in the template
+    execute 'read ' . g:PlanTemplatePath . "monthly.md"
+    call plan#replaceTemplateVariables()
+  endif
+endfunction
+
+function! plan#OpenCurrentPlanByYear()
+  let plan = plan#GetCurrentPlanByYear()
+  execute 'edit' plan
+  if !filereadable(plan)
+    "read in the template
+    execute 'read ' . g:PlanTemplatePath . "yearly.md"
+    call plan#replaceTemplateVariables()
+  endif
+endfunction
