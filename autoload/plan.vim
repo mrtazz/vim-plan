@@ -3,13 +3,41 @@ if &cp || (exists('g:loaded_plan_vim') && g:loaded_plan_vim)
 endif
 let g:loaded_plan_vim = 1
 
-if !exists("g:PlanPath")
-  let g:PlanPath = "~/.plan/"
-endif
 
-if !exists("g:PlanTemplatePath")
-  let g:PlanTemplatePath = "~/.plan/templates/"
-endif
+let g:PlanBaseDir = get(g:, 'PlanBaseDir', $HOME . "/.plan")
+let g:PlanTemplatePath = get(g:, 'PlanTemplatePath', "/templates/")
+
+
+" set up some directory definitions
+let s:dailiesDirectory = g:PlanBaseDir . "/dailies"
+let s:notesDirectory = g:PlanBaseDir . "/notes"
+
+
+function! plan#OpenDailyNote()
+  let today = strftime("%Y%m%d")
+  call plan#EnsureDirectoryExists(s:dailiesDirectory)
+  let plan = s:dailiesDirectory . "/" . today . ".md"
+  execute 'edit' plan
+  if !filereadable(plan)
+    "read in the template file if available
+    let tmplPath = g:PlanTemplatePath . "daily"
+    if filereadable(tmplPath)
+      execute 'read ' . tmplPath
+      call plan#replaceTemplateVariables()
+    endif
+  endif
+  call plan#setupBuffer()
+endfunction
+
+function! plan#OpenNote()
+  let note = strftime("%Y%m%d-%H%M%S")
+  call plan#EnsureDirectoryExists(s:notesDirectory)
+  let plan = s:notesDirectory . "/" . note . ".md"
+  execute 'edit' plan
+  call plan#setupBuffer()
+endfunction
+
+
 
 function! plan#replaceTemplateVariables()
   " replace occurrences of DATE with the actual date
@@ -40,8 +68,8 @@ endfunction
 
 function! plan#GetCurrentPlanByYear()
   let planYear = strftime('%Y')
-  let planFile = g:PlanPath . planYear . "/year.md"
-  call plan#EnsureDirectoryExists(g:PlanPath . planYear)
+  let planFile = g:PlanBaseDir . planYear . "/year.md"
+  call plan#EnsureDirectoryExists(g:PlanBaseDir . planYear)
   return planFile
 endfunction
 
@@ -49,16 +77,16 @@ function! plan#GetCurrentPlanByMonth()
   let planMonth = strftime('%B')
   let planMonthNumber = strftime('%m')
   let planYear = strftime('%Y')
-  let planFile = g:PlanPath . planYear . "/" . planMonthNumber . '-' .planMonth . ".md"
-  call plan#EnsureDirectoryExists(g:PlanPath . planYear)
+  let planFile = g:PlanBaseDir . planYear . "/" . planMonthNumber . '-' .planMonth . ".md"
+  call plan#EnsureDirectoryExists(g:PlanBaseDir . planYear)
   return planFile
 endfunction
 
 function! plan#GetCurrentPlanByWeek()
   let planWeek = strftime('%V')
   let planYear = strftime('%Y')
-  let planFile = g:PlanPath . planYear . "/weeks/" . planWeek . ".md"
-  call plan#EnsureDirectoryExists(g:PlanPath . planYear . "/weeks")
+  let planFile = g:PlanBaseDir . planYear . "/weeks/" . planWeek . ".md"
+  call plan#EnsureDirectoryExists(g:PlanBaseDir . planYear . "/weeks")
   return planFile
 endfunction
 
@@ -116,5 +144,5 @@ function! plan#EnsureDirectoryExists(dir)
 endfunction
 
 function! plan#setupBuffer()
-  execute 'lcd' g:PlanPath
+  execute 'lcd' g:PlanBaseDir
 endfunction
