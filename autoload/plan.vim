@@ -38,6 +38,19 @@ function! plan#OpenNote()
 endfunction
 
 
+function! plan#MarkDone()
+  call setline(line('.'), substitute(getline('.'), '- \[ \]', '- [x]', 'g'))
+endfunction
+
+function! plan#MigrateToToday()
+  let today = strftime("%Y%m%d")
+  let todayplan = s:dailiesDirectory . "/" . today . ".md"
+  let current_daily =  expand("%:t:r")
+  let moved_todo = getline('.') . ' <' . current_daily
+  call writefile([moved_todo], todayplan, "a")
+  call setline(line('.'), substitute(getline('.'), '- \[ \]', '- [x]', 'g'))
+  execute "normal! A" . ' >' . today
+endfunction
 
 function! plan#replaceTemplateVariables()
   " replace occurrences of DATE with the actual date
@@ -64,77 +77,6 @@ function! plan#replaceTemplateVariables()
   if getline(line(".")-1) =~ '^\s*$'
       exec line(".")-1 . 'd'
   endif
-endfunction
-
-function! plan#GetCurrentPlanByYear()
-  let planYear = strftime('%Y')
-  let planFile = g:PlanBaseDir . planYear . "/year.md"
-  call plan#EnsureDirectoryExists(g:PlanBaseDir . planYear)
-  return planFile
-endfunction
-
-function! plan#GetCurrentPlanByMonth()
-  let planMonth = strftime('%B')
-  let planMonthNumber = strftime('%m')
-  let planYear = strftime('%Y')
-  let planFile = g:PlanBaseDir . planYear . "/" . planMonthNumber . '-' .planMonth . ".md"
-  call plan#EnsureDirectoryExists(g:PlanBaseDir . planYear)
-  return planFile
-endfunction
-
-function! plan#GetCurrentPlanByWeek()
-  let planWeek = strftime('%V')
-  let planYear = strftime('%Y')
-  let planFile = g:PlanBaseDir . planYear . "/weeks/" . planWeek . ".md"
-  call plan#EnsureDirectoryExists(g:PlanBaseDir . planYear . "/weeks")
-  return planFile
-endfunction
-
-function! plan#OpenCurrentPlanByWeek()
-  let plan = plan#GetCurrentPlanByWeek()
-  execute 'edit' plan
-  if !filereadable(plan)
-    "read in the template file if available
-    let tmplPath = g:PlanTemplatePath . "week"
-    if filereadable(tmplPath)
-      execute 'read ' . tmplPath
-      call plan#replaceTemplateVariables()
-    endif
-  endif
-  call plan#setupBuffer()
-endfunction
-
-function! plan#OpenCurrentPlanByMonth()
-  let plan = plan#GetCurrentPlanByMonth()
-  execute 'edit' plan
-  if !filereadable(plan)
-    "read in the template file if available
-    let tmplPath = g:PlanTemplatePath . "month"
-    if filereadable(tmplPath)
-      execute 'read ' . tmplPath
-      call plan#replaceTemplateVariables()
-    endif
-  endif
-  call plan#setupBuffer()
-endfunction
-
-function! plan#OpenCurrentPlanByYear()
-  let plan = plan#GetCurrentPlanByYear()
-  execute 'edit' plan
-  if !filereadable(plan)
-    " read in the template file if available
-    let tmplPath = g:PlanTemplatePath . "year"
-    if filereadable(tmplPath)
-      execute 'read ' . tmplPath
-      call plan#replaceTemplateVariables()
-    endif
-  endif
-  call plan#setupBuffer()
-endfunction
-
-function! plan#Today()
-  let today = strftime("%A %m\/%d\/%Y")
-  exe "normal a". today
 endfunction
 
 function! plan#EnsureDirectoryExists(dir)
