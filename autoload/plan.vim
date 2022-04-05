@@ -42,13 +42,17 @@ function! plan#MarkDone()
   call setline(line('.'), substitute(getline('.'), '- \[ \]', '- [x]', 'g'))
 endfunction
 
+function! plan#MarkCanceled()
+  call setline(line('.'), substitute(getline('.'), '- \[ \]', '- [-]', 'g'))
+endfunction
+
 function! plan#MigrateToToday()
   let today = strftime("%Y%m%d")
   let todayplan = s:dailiesDirectory . "/" . today . ".md"
   let current_daily =  expand("%:t:r")
   let moved_todo = getline('.') . ' <' . current_daily
   call writefile([moved_todo], todayplan, "a")
-  call setline(line('.'), substitute(getline('.'), '- \[ \]', '- [x]', 'g'))
+  call setline(line('.'), substitute(getline('.'), '- \[ \]', '- [>]', 'g'))
   execute "normal! A" . ' >' . today
 endfunction
 
