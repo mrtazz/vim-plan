@@ -2,7 +2,7 @@ if has('conceal')
   if &termencoding ==# "utf-8" || &encoding ==# "utf-8"
     let s:checkbox_unchecked = "⭕️"
     let s:checkbox_checked = "✅"
-    let s:checkbox_canceled = "❌"
+    let s:checkbox_canceled = "🚫"
     let s:checkbox_migrated = "🔜"
   else
     let s:checkbox_unchecked = 'o'
