@@ -91,4 +91,5 @@ endfunction
 
 function! plan#setupBuffer()
   execute 'lcd' g:PlanBaseDir
+  execute 'runtime' "syntax/plan.vim"
 endfunction
