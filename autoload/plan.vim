@@ -4,14 +4,10 @@ endif
 let g:loaded_plan_vim = 1
 
 
-let g:PlanBaseDir = get(g:, 'PlanBaseDir', $HOME . "/.plan")
-let g:PlanTemplatePath = get(g:, 'PlanTemplatePath', "/templates/")
-
-
 " set up some directory definitions
-let s:dailiesDirectory = g:PlanBaseDir . "/dailies"
-let s:notesDirectory = g:PlanBaseDir . "/notes"
-
+let s:dailiesDirectory = g:PlanBaseDir . "/" . g:PlanDailiesDir
+let s:notesDirectory = g:PlanBaseDir . "/" . g:PlanNotesDir
+let s:templatePath = g:PlanBaseDir . "/" . g:PlanTemplateDir
 
 function! plan#OpenDailyNote()
   let today = strftime("%Y%m%d")
@@ -20,7 +16,7 @@ function! plan#OpenDailyNote()
   execute 'edit' plan
   if !filereadable(plan)
     "read in the template file if available
-    let tmplPath = g:PlanTemplatePath . "daily"
+    let tmplPath = s:templatePath . "/daily"
     if filereadable(tmplPath)
       execute 'read ' . tmplPath
       call plan#replaceTemplateVariables()
@@ -93,3 +89,4 @@ function! plan#setupBuffer()
   execute 'lcd' g:PlanBaseDir
   execute 'runtime' "syntax/plan.vim"
 endfunction
+
