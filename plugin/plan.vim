@@ -19,6 +19,6 @@ augroup PluginPlan
   execute 'autocmd BufEnter */'.g:PlanNotesDir.'/*.md runtime syntax/plan.vim'
 
   " make sure idle notes are getting written to disk periodically
-  execute 'autocmd CursorHold,CursorHoldI */'.g:PlanDailiesDir.'/*.md update'
-  execute 'autocmd CursorHold,CursorHoldI */'.g:PlanNotesDir.'/*.md update'
+  execute 'autocmd CursorHold,CursorHoldI,BufLeave */'.g:PlanDailiesDir.'/*.md update'
+  execute 'autocmd CursorHold,CursorHoldI,BufLeave */'.g:PlanNotesDir.'/*.md update'
 augroup END
