@@ -11,10 +11,14 @@ command! PlanMarkDone :call plan#MarkDone()
 command! PlanMarkCanceled :call plan#MarkCanceled()
 command! PlanMigrateToToday :call plan#MigrateToToday()
 
-" source syntax files for all notes files
-execute 'autocmd BufEnter */'.g:PlanDailiesDir.'/*.md runtime syntax/plan.vim'
-execute 'autocmd BufEnter */'.g:PlanNotesDir.'/*.md runtime syntax/plan.vim'
 
-" make sure idle notes are getting written to disk periodically
-execute 'autocmd CursorHold,CursorHoldI */'.g:PlanDailiesDir.'/*.md update'
-execute 'autocmd CursorHold,CursorHoldI */'.g:PlanNotesDir.'/*.md update'
+augroup PluginPlan
+  autocmd!
+  " source syntax files for all notes files
+  execute 'autocmd BufEnter */'.g:PlanDailiesDir.'/*.md runtime syntax/plan.vim'
+  execute 'autocmd BufEnter */'.g:PlanNotesDir.'/*.md runtime syntax/plan.vim'
+
+  " make sure idle notes are getting written to disk periodically
+  execute 'autocmd CursorHold,CursorHoldI */'.g:PlanDailiesDir.'/*.md update'
+  execute 'autocmd CursorHold,CursorHoldI */'.g:PlanNotesDir.'/*.md update'
+augroup END
