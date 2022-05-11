@@ -1,9 +1,24 @@
-command! OpenWeekPlan :call plan#OpenCurrentPlanByWeek()
-command! OpenMonthPlan :call plan#OpenCurrentPlanByMonth()
-command! OpenYearPlan :call plan#OpenCurrentPlanByYear()
-command! Today :call plan#Today()
+" define some basic variables
+let g:PlanBaseDir = get(g:, 'PlanBaseDir', $HOME . "/.plan")
+let g:PlanTemplateDir = get(g:, 'PlanTemplatePath', "templates")
+let g:PlanDailiesDir = get(g:, 'PlanTemplatePath', "dailies")
+let g:PlanNotesDir = get(g:, 'PlanTemplatePath', "notes")
 
-map <leader>pw :OpenWeekPlan<CR>
-map <leader>pm :OpenMonthPlan<CR>
-map <leader>py :OpenYearPlan<CR>
-map <leader>pd :Today<CR>
+
+command! PlanDaily :call plan#OpenDailyNote()
+command! PlanNote :call plan#OpenNote()
+command! PlanMarkDone :call plan#MarkDone()
+command! PlanMarkCanceled :call plan#MarkCanceled()
+command! PlanMigrateToToday :call plan#MigrateToToday()
+
+
+augroup PluginPlan
+  autocmd!
+  " source syntax files for all notes files
+  execute 'autocmd BufEnter */'.g:PlanDailiesDir.'/*.md runtime syntax/plan.vim'
+  execute 'autocmd BufEnter */'.g:PlanNotesDir.'/*.md runtime syntax/plan.vim'
+
+  " make sure idle notes are getting written to disk periodically
+  execute 'autocmd CursorHold,CursorHoldI,BufLeave */'.g:PlanDailiesDir.'/*.md update'
+  execute 'autocmd CursorHold,CursorHoldI,BufLeave */'.g:PlanNotesDir.'/*.md update'
+augroup END

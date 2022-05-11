@@ -3,13 +3,54 @@ if &cp || (exists('g:loaded_plan_vim') && g:loaded_plan_vim)
 endif
 let g:loaded_plan_vim = 1
 
-if !exists("g:PlanPath")
-  let g:PlanPath = "~/.plan/"
-endif
 
-if !exists("g:PlanTemplatePath")
-  let g:PlanTemplatePath = "~/.plan/templates/"
-endif
+" set up some directory definitions
+let s:dailiesDirectory = g:PlanBaseDir . "/" . g:PlanDailiesDir
+let s:notesDirectory = g:PlanBaseDir . "/" . g:PlanNotesDir
+let s:templatePath = g:PlanBaseDir . "/" . g:PlanTemplateDir
+
+function! plan#OpenDailyNote()
+  let today = strftime("%Y%m%d")
+  call plan#EnsureDirectoryExists(s:dailiesDirectory)
+  let plan = s:dailiesDirectory . "/" . today . ".md"
+  execute 'edit' plan
+  if !filereadable(plan)
+    "read in the template file if available
+    let tmplPath = s:templatePath . "/daily"
+    if filereadable(tmplPath)
+      execute 'read ' . tmplPath
+      call plan#replaceTemplateVariables()
+    endif
+  endif
+  call plan#setupBuffer()
+endfunction
+
+function! plan#OpenNote()
+  let note = strftime("%Y%m%d-%H%M%S")
+  call plan#EnsureDirectoryExists(s:notesDirectory)
+  let plan = s:notesDirectory . "/" . note . ".md"
+  execute 'edit' plan
+  call plan#setupBuffer()
+endfunction
+
+
+function! plan#MarkDone()
+  call setline(line('.'), substitute(getline('.'), '- \[ \]', '- [x]', 'g'))
+endfunction
+
+function! plan#MarkCanceled()
+  call setline(line('.'), substitute(getline('.'), '- \[ \]', '- [-]', 'g'))
+endfunction
+
+function! plan#MigrateToToday()
+  let today = strftime("%Y%m%d")
+  let todayplan = s:dailiesDirectory . "/" . today . ".md"
+  let current_daily =  expand("%:t:r")
+  let moved_todo = getline('.') . ' <' . current_daily
+  call writefile([moved_todo], todayplan, "a")
+  call setline(line('.'), substitute(getline('.'), '- \[ \]', '- [>]', 'g'))
+  execute "normal! A" . ' >' . today
+endfunction
 
 function! plan#replaceTemplateVariables()
   " replace occurrences of DATE with the actual date
@@ -38,77 +79,6 @@ function! plan#replaceTemplateVariables()
   endif
 endfunction
 
-function! plan#GetCurrentPlanByYear()
-  let planYear = strftime('%Y')
-  let planFile = g:PlanPath . planYear . "/year.md"
-  call plan#EnsureDirectoryExists(g:PlanPath . planYear)
-  return planFile
-endfunction
-
-function! plan#GetCurrentPlanByMonth()
-  let planMonth = strftime('%B')
-  let planMonthNumber = strftime('%m')
-  let planYear = strftime('%Y')
-  let planFile = g:PlanPath . planYear . "/" . planMonthNumber . '-' .planMonth . ".md"
-  call plan#EnsureDirectoryExists(g:PlanPath . planYear)
-  return planFile
-endfunction
-
-function! plan#GetCurrentPlanByWeek()
-  let planWeek = strftime('%V')
-  let planYear = strftime('%Y')
-  let planFile = g:PlanPath . planYear . "/weeks/" . planWeek . ".md"
-  call plan#EnsureDirectoryExists(g:PlanPath . planYear . "/weeks")
-  return planFile
-endfunction
-
-function! plan#OpenCurrentPlanByWeek()
-  let plan = plan#GetCurrentPlanByWeek()
-  execute 'edit' plan
-  if !filereadable(plan)
-    "read in the template file if available
-    let tmplPath = g:PlanTemplatePath . "week"
-    if filereadable(tmplPath)
-      execute 'read ' . tmplPath
-      call plan#replaceTemplateVariables()
-    endif
-  endif
-  call plan#setupBuffer()
-endfunction
-
-function! plan#OpenCurrentPlanByMonth()
-  let plan = plan#GetCurrentPlanByMonth()
-  execute 'edit' plan
-  if !filereadable(plan)
-    "read in the template file if available
-    let tmplPath = g:PlanTemplatePath . "month"
-    if filereadable(tmplPath)
-      execute 'read ' . tmplPath
-      call plan#replaceTemplateVariables()
-    endif
-  endif
-  call plan#setupBuffer()
-endfunction
-
-function! plan#OpenCurrentPlanByYear()
-  let plan = plan#GetCurrentPlanByYear()
-  execute 'edit' plan
-  if !filereadable(plan)
-    " read in the template file if available
-    let tmplPath = g:PlanTemplatePath . "year"
-    if filereadable(tmplPath)
-      execute 'read ' . tmplPath
-      call plan#replaceTemplateVariables()
-    endif
-  endif
-  call plan#setupBuffer()
-endfunction
-
-function! plan#Today()
-  let today = strftime("%A %m\/%d\/%Y")
-  exe "normal a". today
-endfunction
-
 function! plan#EnsureDirectoryExists(dir)
   if !isdirectory(a:dir)
     call mkdir(a:dir, "p")
@@ -116,5 +86,6 @@ function! plan#EnsureDirectoryExists(dir)
 endfunction
 
 function! plan#setupBuffer()
-  execute 'lcd' g:PlanPath
+  execute 'lcd' g:PlanBaseDir
 endfunction
+
