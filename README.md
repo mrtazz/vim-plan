@@ -74,6 +74,7 @@ When reading those templates in vim-plan will replace the following template
 variables inline:
 
 - `%%DATE%%` with the current date of the format mm/dd/yyyy
+- `%%DATE_8601%%` with the current date of the format yyyy/mm/dd
 - `%%WEEKDAY%%` with the name of weekday
 - `%%WEEKNUMBER%%` with the number of the week
 - `%%YEAR%%` with the current year yyyy
