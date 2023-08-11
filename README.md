@@ -134,6 +134,73 @@ tab complete @usernames in vim:
 --mline-regex-markdowntags=/(^|[[:space:]])@(\w\S*)/\2/t/{mgroup=1}
 ```
 
+In my notes repo I have a nightly action that updates tags which makes it really easy
+to have completion of notes with about a day or so delay:
+
+```
+name: update-tags
+
+on:
+  workflow_dispatch:
+  schedule:
+    # run every weekday morning
+    - cron: '30 3 * * 1-5'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: dependencies
+        run:  sudo apt-get install universal-ctags
+
+      - name: generate tags
+        run: make tags
+
+      - name: commit and push changes
+        run: |
+          git config user.name Github Actions
+          git config user.email actions@noreply.github.com
+          git add tags
+          git commit --allow-empty -m "update tags"
+          git push
+```
+
+### Additional tooling
+There is a commandline tool [`plan`](https://github.com/mrtazz/plan) which provides some additional
+support tooling mostly around automation. For example I run this Action every weekday morning to 
+prep my daily note with some information:
+
+```
+name: daily-prep
+
+on:
+  workflow_dispatch:
+  schedule:
+    # run every weekday morning
+    - cron: '30 5 * * 1-5'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: populate daily note
+        run:  make prepare-the-day
+        env:
+          ISSUES_TOKEN_GITHUB: ${{ secrets.ISSUES_TOKEN_GITHUB }}
+
+      - name: commit and push changes
+        run: |
+          git config user.name Github Actions
+          git config user.email actions@noreply.github.com
+          git add dailies
+          git commit -m "create daily note"
+          git push
+```
+
 ## Configuration
 There are a couple of variables that can be set to customize mostly file
 locations:
