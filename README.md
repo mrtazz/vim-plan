@@ -46,6 +46,10 @@ which will look like this as long as the cursor isn't on the line:
 ```
 
 This only works if vim is compiled with `conceal` support and utf-8 encoding.
+This is how it looks like in MacVim:
+
+![screen recording of conceal feature](https://github.com/mrtazz/vim-plan/assets/68183/5062d1c3-f487-4de4-86f2-e83b9ec11030)
+
 
 ### TODOs in location window
 The plugin provides a command `:PlanFindTodos` that uses `:lgrep` to find the
