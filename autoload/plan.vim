@@ -9,6 +9,7 @@ let s:dailiesDirectory = g:PlanBaseDir . "/" . g:PlanDailiesDir
 let s:weekliesDirectory = g:PlanBaseDir . "/" . g:PlanWeekliesDir
 let s:dailiesTpl = g:PlanBaseDir . "/" . g:PlanTemplateDir . "/" . g:PlanDailyTemplate
 let s:weekliesTpl = g:PlanBaseDir . "/" . g:PlanTemplateDir . "/" . g:PlanWeeklyTemplate
+let s:notesTpl = g:PlanBaseDir . "/" . g:PlanTemplateDir . "/" . g:PlanNoteTemplate
 let s:notesDirectory = g:PlanBaseDir . "/" . g:PlanNotesDir
 let s:templatePath = g:PlanBaseDir . "/" . g:PlanTemplateDir
 let s:titleEnabled = g:PlanPromptForTitle
@@ -38,7 +39,6 @@ function! plan#OpenWeeklyNote()
   if !filereadable(plan)
     "read in the template file if available
     let tmplPath = s:weekliesTpl
-    echo "Trying to read in weekly template: " . tmplPath
     if filereadable(tmplPath)
       execute 'read ' . tmplPath
       call plan#replaceTemplateVariables()
@@ -54,6 +54,14 @@ function! plan#OpenNote()
   call plan#EnsureDirectoryExists(s:notesDirectory)
   let plan = s:notesDirectory . "/" . dateTime . maybeTitle . ".md"
   execute 'edit' plan
+  if !filereadable(plan)
+    "read in the template file if available
+    let tmplPath = s:notesTpl
+    if filereadable(tmplPath)
+      execute 'read ' . tmplPath
+      call plan#replaceTemplateVariables()
+    endif
+  endif
   call plan#setupBuffer()
 endfunction
 
