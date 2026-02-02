@@ -13,7 +13,7 @@ let s:notesTpl = g:PlanBaseDir . "/" . g:PlanTemplateDir . "/" . g:PlanNoteTempl
 let s:notesDirectory = g:PlanBaseDir . "/" . g:PlanNotesDir
 let s:templatePath = g:PlanBaseDir . "/" . g:PlanTemplateDir
 let s:titleEnabled = g:PlanPromptForTitle
-let s:assetsDirectoryName = g:PlanBaseDir . "/" . g:PlanAssetsDirectory
+let s:assetsDirectoryName = g:PlanAssetsDirectory
 let s:noteTimestampPrefix = g:PlanNoteTimestampPrefix
 
 
@@ -145,14 +145,14 @@ function! plan#ImportAsset(full_file_path)
 
   let filename = fnamemodify(full_file_path, ":t")
   let filename = substitute(filename, " ", "_", "g")
-  let today = strftime("%Y%m%d")
-  let screenshotDestination = s:assetsDirectoryName . '/' . today
+  let current_dir = expand("%:h")
+  let screenshotDestination = current_dir . '/' . s:assetsDirectoryName
   call plan#EnsureDirectoryExists(screenshotDestination)
   let cmd = 'cp -p ' . fnamemodify(full_file_path, ":S") . ' ' . screenshotDestination . '/' . filename
   let out = system(cmd)
   if len(out) > 0
     echoerr out
   endif
-  execute "normal! A" . '![](' . screenshotDestination . '/' . filename . ')'
+  execute "normal! A" . '![](' . s:assetsDirectoryName . '/' . filename . ')'
 endfunction
 
