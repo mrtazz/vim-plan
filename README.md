@@ -247,3 +247,4 @@ let g:PlanAddNERDTreeNewNoteMenuItem = get(g:, 'PlanAddNERDTreeNewNoteMenuItem',
 [vim_stencil]: https://github.com/mrtazz/vim-stencil
 [obsidian]: https://obsidian.md/
 [noteplan]: https://noteplan.co/
+[nerdtree]: https://github.com/preservim/nerdtree
