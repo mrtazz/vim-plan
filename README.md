@@ -90,9 +90,9 @@ variables inline:
 ### NERDTree integration
 
 The plugin provides integration with the [NERDTree vim plugin][nerdtree]
-to add a new menu item to the modify menu. I allows to create a new note add a
-tree node via the 'n' shortcut. The integration is off by default and can be
-enabled via the config setting:
+to add a new menu item to the modify menu. I allows to create a new note added
+to a tree node via the 'n' shortcut. The integration is off by default and can
+be enabled via the config setting:
 
 ```
 let g:PlanAddNERDTreeNewNoteMenuItem = 1
